@@ -4,7 +4,7 @@ import jsonpath
 
 # https://hooks.slack.com/services/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
 
-webhook = 'https://hooks.slack.com/services/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'
+webhook = 'https://hooks.slack.com/services/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'
 rates_url ='http://tech.money24.kharkov.ua/rates'
 
 payload = {
@@ -20,25 +20,31 @@ json_response = json.loads(response.text)
 current_us_rate = jsonpath.jsonpath(json_response, 'rates[11].buy')
 print(current_us_rate[0])
 
+# Changing rate type to float
 current_us_rate_float = float(current_us_rate[0])
-print(type(current_us_rate_float))
+# print(type(current_us_rate_float))
 
+# Reading previous rate from tha file
 f = open("us_rate_history.txt","r")
 old_us_rate = f.read()
 
+# Changing rate type to float
 old_us_rate_float = float(old_us_rate)
-print(type(old_us_rate_float))
+# print(type(old_us_rate_float))
 
 print("Старый курс: " + old_us_rate)
 # print(type(old_us_rate[0]))
 # print(type(current_us_rate))
 
 if current_us_rate_float == old_us_rate_float:
-	print("Ok")
+	print("Nothing changed")
 else:
 	f = open("us_rate_history.txt","w+")
 	f.write(current_us_rate[0])
 	f.close()
+	if current_us_rate_float < old_us_rate_float:
+		data = {"text": "Курс доллара уменьшился: " + current_us_rate[0]}
+	else:
+		data = {"text": "Курс доллара увеличился: " + current_us_rate[0]}
 
-	data = {"text": "Курс доллара на сегодня: " + current_us_rate[0]}
 	resp = requests.post(webhook, data=json.dumps(data))
